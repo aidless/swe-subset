@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swe-subset"
+version = "0.1.0"
+description = "Auditable SWE-bench subset builder with zero runtime dependencies"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+swe-subset = "swe_subset.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["swe_subset*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

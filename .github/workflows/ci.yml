@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pytest
+        run: python -m pip install --upgrade pip pytest
+      - name: Unit and failure-mode tests
+        # Real-data tests self-skip when data/ is absent; CI only has the synthetic fixture.
+        run: python -m pytest -q
+      - name: Build twice on synthetic fixture and compare bytes
+        run: |
+          python -m swe_subset build --input tests/fixtures/synthetic_instances.jsonl --out /tmp/run-a --label synthetic-fixture
+          python -m swe_subset build --input tests/fixtures/synthetic_instances.jsonl --out /tmp/run-b --label synthetic-fixture
+          diff -r /tmp/run-a /tmp/run-b
+      - name: Verify manifest against subset and fixture input
+        run: |
+          python -m swe_subset verify \
+            --subset /tmp/run-a/subset.jsonl \
+            --manifest /tmp/run-a/manifest.json \
+            --input tests/fixtures/synthetic_instances.jsonl

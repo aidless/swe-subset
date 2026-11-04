@@ -1,0 +1,9 @@
+out/
+out-real/
+data/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.venv/
+uv.lock
