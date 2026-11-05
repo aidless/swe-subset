@@ -1,8 +1,12 @@
 """共享测试数据：一条完全合规的合成实例 + 固定路径。"""
 
+import re
 from pathlib import Path
 
 import pytest
+
+# README 里本地 gzip 的唯一预期哈希。CI 不下载该文件。
+DOCUMENTED_GZIP_SHA256_RE = re.compile(r"预期 gzip sha256：`([0-9a-f]{64})`")
 
 ROOT = Path(__file__).resolve().parent.parent
 SYNTHETIC = ROOT / "tests" / "fixtures" / "synthetic_instances.jsonl"

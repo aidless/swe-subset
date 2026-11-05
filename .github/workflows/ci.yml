@@ -19,16 +19,16 @@ jobs:
       - name: Install pytest
         run: python -m pip install --upgrade pip pytest
       - name: Unit and failure-mode tests
-        # Real-data tests self-skip when data/ is absent; CI only has the synthetic fixture.
+        # tests/test_real_data.py skips when data/ is absent. CI does not download it.
         run: python -m pytest -q
       - name: Build twice on synthetic fixture and compare bytes
         run: |
-          python -m swe_subset build --input tests/fixtures/synthetic_instances.jsonl --out /tmp/run-a --label synthetic-fixture
-          python -m swe_subset build --input tests/fixtures/synthetic_instances.jsonl --out /tmp/run-b --label synthetic-fixture
-          diff -r /tmp/run-a /tmp/run-b
+          python -m swe_subset build --input tests/fixtures/synthetic_instances.jsonl --out out/ci-a --label synthetic-fixture
+          python -m swe_subset build --input tests/fixtures/synthetic_instances.jsonl --out out/ci-b --label synthetic-fixture
+          diff -r out/ci-a out/ci-b
       - name: Verify manifest against subset and fixture input
         run: |
           python -m swe_subset verify \
-            --subset /tmp/run-a/subset.jsonl \
-            --manifest /tmp/run-a/manifest.json \
+            --subset out/ci-a/subset.jsonl \
+            --manifest out/ci-a/manifest.json \
             --input tests/fixtures/synthetic_instances.jsonl

@@ -76,11 +76,10 @@ def _binary_paths_in_block(block: str) -> set[str]:
 
 
 def binary_paths(text: str) -> set[str]:
-    """返回补丁中无法仅凭 JSONL 物化的二进制文件路径。
+    """返回补丁中无法仅凭 JSONL 还原的二进制文件路径。
 
     判据：该块含 `Binary files ... differ` 或 `GIT binary patch`。
-    这类 diff 没有完整二进制内容，`git apply` 会拒绝（已在 SWE-bench
-    审计中用真实仓库实测：`cannot apply binary patch without full index line`）。
+    这类 diff 没有完整二进制内容。本模块不调用 git apply。
     """
     hits: set[str] = set()
     for block in split_diffs(text):

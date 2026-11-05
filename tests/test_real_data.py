@@ -1,16 +1,17 @@
-"""真实数据回归：本机附带的 SWE-bench_Multimodal dev（102 条）必须能端到端跑通。
+"""真实数据回归：仅当本机放了 SWE-bench_Multimodal dev gzip 时运行。
 
-这些断言只固定数据集事实（102 条、44 条空 P2P）与产物性质，不固定子集大小，
-避免规则措辞微调时把测试改成"追着实现跑"。
+这些断言只固定数据集事实（102 条、44 条空 P2P）、文件哈希与产物性质，
+不固定子集大小。CI 没有这份文件，因此不会跑到这里。
 """
 
+import hashlib
 import json
 
 import pytest
 
 from swe_subset.cli import main
 
-from conftest import REAL_DATA
+from conftest import DOCUMENTED_GZIP_SHA256_RE, REAL_DATA, ROOT
 
 pytestmark = pytest.mark.skipif(not REAL_DATA.exists(), reason="真实数据文件未随仓库提供")
 
@@ -60,6 +61,15 @@ def test_real_data_build_and_verify(tmp_path):
     report = (out / "report.md").read_text(encoding="utf-8")
     assert "swebench-multimodal-dev" in report
     assert "没有执行任何测试" in report
+
+
+def test_local_gzip_matches_documented_sha256():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    matches = DOCUMENTED_GZIP_SHA256_RE.findall(readme)
+    assert matches, "README 必须记录本地 gzip 的预期 sha256"
+    assert len(matches) == 1
+    digest = hashlib.sha256(REAL_DATA.read_bytes()).hexdigest()
+    assert digest == matches[0]
 
 
 def test_real_data_is_byte_identical_across_runs(tmp_path):

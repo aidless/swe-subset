@@ -94,4 +94,6 @@ def test_report_states_proof_boundaries(tmp_path):
     assert "这份子集能证明什么" in report
     assert "这份子集不能证明什么" in report
     assert "不能证明这些补丁能跑通" in report
+    assert "本文件只记录这一次写出的字节" in report
+    assert "本机实跑" not in report
     assert "synthetic-fixture" in report
