@@ -260,7 +260,7 @@ def rule_repo_local_paths(rec: dict) -> RuleResult:
 
 
 # --------------------------------------------------------------------------
-# R6: 不允许二进制 diff 块（今天的 fixture .png 盲区）
+# R6: 不允许无法从 JSONL 还原的二进制 diff 块
 # --------------------------------------------------------------------------
 def rule_no_binary_diff(rec: dict) -> RuleResult:
     hits = sorted(binary_paths(rec["patch"]) | binary_paths(rec["test_patch"]))
@@ -270,7 +270,7 @@ def rule_no_binary_diff(rec: dict) -> RuleResult:
         return RuleResult(
             False,
             f"含 {len(hits)} 个二进制 diff 文件（{preview}{more}）；"
-            f"此类 diff 无完整二进制内容，git apply 会拒绝物化",
+            f"此类 diff 无完整二进制内容，不能只凭 JSONL 还原文件",
         )
     return RuleResult(True, "没有二进制 diff 块")
 
@@ -278,8 +278,7 @@ def rule_no_binary_diff(rec: dict) -> RuleResult:
 RULES: tuple[Rule, ...] = (
     Rule(
         "R1", "PASS_TO_PASS 非空",
-        "PASS_TO_PASS 为空时回归信号不存在：官方 FAIL_ONLY 评分下，"
-        "非目标测试失败不会进入判定（今天 dev 数据里 44/102 因此失去回归约束）。",
+        "PASS_TO_PASS 为空时没有回归名单。本规则只检查名单在去掉空白后非空，不运行评分器。",
         rule_p2p_nonempty,
     ),
     Rule(
@@ -289,8 +288,7 @@ RULES: tuple[Rule, ...] = (
     ),
     Rule(
         "R3", "FAIL_TO_PASS 可在 test_patch 中定位",
-        "真实 SWE-bench 中 F2P 与 test_patch 不对应（标题拼写差异、fixture 路径写法、"
-        "测试未落盘）会让评分指向不存在的测试，属于不可复核的目标。",
+        "F2P 与 test_patch 对不上时，无法从补丁文本复核评分目标。",
         rule_f2p_locatable,
     ),
     Rule(
@@ -307,9 +305,8 @@ RULES: tuple[Rule, ...] = (
     ),
     Rule(
         "R6", "不含二进制 diff 块",
-        "`Binary files ... differ` / `GIT binary patch` 不含完整二进制内容，"
-        "仅凭 JSONL 无法物化；今天审计中 14 个新增 .png fixture 对应的测试"
-        " 0/14 进入 oracle，正是这一类盲区（判据是 diff 形态，不是硬编码实例 id）。",
+        "`Binary files ... differ` / `GIT binary patch` 不含完整文件字节，"
+        "不能只凭 JSONL 还原。判据是 diff 形态，不是实例 id。",
         rule_no_binary_diff,
     ),
 )

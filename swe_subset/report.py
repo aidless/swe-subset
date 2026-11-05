@@ -64,8 +64,8 @@ def render_report(
             f"| {rule.id} {rule.title} | {item['criterion']} | {item['independent']} | {item['waterfall']} |"
         )
     lines.append("")
-    lines.append("说明：`独立命中` 是只看该规则时的排除数，多条规则可能命中同一实例；"
-                 "`顺序累计排除` 是按 R1→R6 顺序判定时新增的排除数，两者最后都等于总排除数。")
+    lines.append("说明：`独立命中` 是只看该规则时的排除数，多条规则可以命中同一实例，因此独立命中相加可以大于总排除数。"
+                 "`顺序累计排除` 是按 R1→R6 判定时新增加的排除数，这一列相加等于总排除数。")
     lines.append("")
     lines.append("## 2. 排除明细")
     lines.append("")
@@ -106,17 +106,17 @@ def render_report(
     )
     empty_p2p = next((item["independent"] for item in rule_stats if item["id"] == "R1"), 0)
     lines.append(
-        f"2. 输入中 **{empty_p2p}** 条 `PASS_TO_PASS` 为空的实例全部被 R1 排除，"
-        "子集因此不继承今天审计发现的 `FAIL_ONLY` 静默放行路径"
-        "（目标测试通过 + 其它测试失败仍判 resolved）。"
+        f"2. 输入中 **{empty_p2p}** 条 `PASS_TO_PASS` 为空（或只有空白）的实例被 R1 排除，"
+        "子集里不保留空回归名单。本工具不运行外部评分器，因此这里不判断"
+        "某个 swebench 版本会给这些实例什么结论。"
     )
     lines.append(
-        "3. 子集**不含**二进制 diff 实例，因此不依赖 `image_assets` 之类的外部资产恢复机制"
-        "才能让测试补丁落地。"
+        "3. 子集**不含**二进制 diff 块，因此这些补丁里被改文件的文本都在 diff 中。"
+        "本工具不检查 `image_assets`，也不把补丁应用到仓库。"
     )
     lines.append(
-        "4. 子集与 manifest 可重放：同一输入重复运行，`subset.jsonl`、`manifest.json`、"
-        "`audit.json`、`report.md` 逐字节一致（已由测试与本机实跑验证）。"
+        "4. 四份产物不含时间戳、主机名或绝对路径，以便同一输入的下一次运行写出相同字节。"
+        "本文件只记录这一次写出的字节。"
     )
     lines.append(
         "5. 任何第三方拿到同一输入文件和本工具，可以独立复算出**完全相同**的准入集合与哈希。"
@@ -129,9 +129,8 @@ def render_report(
         "`FAIL_TO_PASS` 可定位、语言单一、路径合法，都只是可评测性的必要条件。"
     )
     lines.append(
-        f"2. **不能证明子集分数与全量 SWE-bench 分数可比。** 子集是过滤后的分布："
-        f"输入 {rows} 条只剩 {len(admitted)} 条，其中 {empty_p2p} 条空 P2P 实例被排除，"
-        f"难度与仓库构成都变了。"
+        f"2. **不能证明子集分数与全量 SWE-bench 分数可比。** 子集是过滤后的集合："
+        f"输入 {rows} 条留下 {len(admitted)} 条，其中 {empty_p2p} 条空 P2P 实例被排除。"
     )
     lines.append(
         "3. **不能证明被排除实例的补丁是错的。** 它们只是 oracle 可复核性不足，"

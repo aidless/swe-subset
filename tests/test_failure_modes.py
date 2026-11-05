@@ -120,7 +120,17 @@ def test_manifest_missing_field_is_detected(tmp_path):
     assert _verify(out) == 1
 
 
-# 失效模式 10：输入文件被替换，但 manifest 仍声称对应旧输入
+# 失效模式 10：规则集指纹与当前代码不一致
+def test_ruleset_fingerprint_mismatch_is_detected(tmp_path):
+    out = tmp_path / "out"
+    assert _build(SYNTHETIC, out) == 0
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    manifest["ruleset_sha256"] = "1" * 64
+    (out / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    assert _verify(out) == 1
+
+
+# 失效模式 11：输入文件被替换，但 manifest 仍声称对应旧输入
 def test_changed_input_against_stale_manifest_is_detected(tmp_path):
     out = tmp_path / "out"
     assert _build(SYNTHETIC, out) == 0
