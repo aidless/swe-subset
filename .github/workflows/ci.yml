@@ -16,8 +16,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install pytest
-        run: python -m pip install --upgrade pip pytest
+      - name: Install pytest (pinned)
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.lock
       - name: Unit and failure-mode tests
         # Real-data tests self-skip when data/ is absent; CI only has the synthetic fixture.
         run: python -m pytest -q

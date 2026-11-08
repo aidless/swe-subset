@@ -39,6 +39,7 @@ python3 -m swe_subset verify \
 跑测试：
 
 ```bash
+python3 -m pip install -r requirements.lock   # 只钉 pytest，运行期零依赖
 python3 -m pytest -q
 ```
 
