@@ -1,5 +1,7 @@
 # swe-subset
 
+[![CI](https://github.com/aidless/swe-subset/actions/workflows/ci.yml/badge.svg)](https://github.com/aidless/swe-subset/actions/workflows/ci.yml)
+
 **可审计的 SWE-bench 子集构建器。零运行时第三方依赖（Python 3.10+ 标准库）。**
 
 当前状态（本机实测，2026-11-04）：
