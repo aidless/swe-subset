@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install pytest (pinned)
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements.lock
+        run: python -m pip install --require-hashes -r requirements.ci.lock
       - name: Unit and failure-mode tests
         # Real-data tests self-skip when data/ is absent; CI only has the synthetic fixture.
         run: python -m pytest -q
